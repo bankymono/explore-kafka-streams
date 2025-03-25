@@ -15,22 +15,28 @@ import java.util.stream.Collectors;
 public class GreetingsTopology {
     public static String GREETINGS = "greetings";
     public static String GREETINGS_UPPERCASE = "greetings_uppercase";
+    public static String GREETINGS_SPANISH = "greetings_spanish";
 
     public static Topology buildTopology() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
-        var greetinStream = streamsBuilder
+        var greetingsStream = streamsBuilder
                 .stream(GREETINGS, Consumed.with(Serdes.String(), Serdes.String()));
-        greetinStream.print(Printed.<String, String>toSysOut().withLabel("greetingStream"));
 
-        var modifiedStream =greetinStream
+        var greetingsSpanishStream = streamsBuilder
+                .stream(GREETINGS_SPANISH, Consumed.with(Serdes.String(), Serdes.String()));
+
+        var mergedStream = greetingsStream.merge(greetingsSpanishStream);
+        mergedStream.print(Printed.<String, String>toSysOut().withLabel("mergedStream"));
+
+        var modifiedStream =mergedStream
 //                .filter((key, value) -> value.length() > 5)
-//                .mapValues((readOnlyKey,value) -> value.toUpperCase());
-        .flatMap((key, value) -> {
-            var newValues = Arrays.asList(value.split(""));
-            return newValues.stream().map(val -> KeyValue.pair(key, val))
-                    .collect(Collectors.toList());
-        });
+                .mapValues((readOnlyKey,value) -> value.toUpperCase());
+//        .flatMap((key, value) -> {
+//            var newValues = Arrays.asList(value.split(""));
+//            return newValues.stream().map(val -> KeyValue.pair(key, val))
+//                    .collect(Collectors.toList());
+//        });
 
         modifiedStream.print(Printed.<String, String>toSysOut().withLabel("modifiedStream"));
 
