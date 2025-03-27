@@ -20,11 +20,15 @@ public class GreetingsTopology {
     public static Topology buildTopology() {
         StreamsBuilder streamsBuilder = new StreamsBuilder();
 
-        var greetingsStream = streamsBuilder
-                .stream(GREETINGS, Consumed.with(Serdes.String(), Serdes.String()));
+        KStream<String, String> greetingsStream = streamsBuilder
+                .stream(GREETINGS
+//                        , Consumed.with(Serdes.String(), Serdes.String())
+                );
 
-        var greetingsSpanishStream = streamsBuilder
-                .stream(GREETINGS_SPANISH, Consumed.with(Serdes.String(), Serdes.String()));
+        KStream<String, String> greetingsSpanishStream = streamsBuilder
+                .stream(GREETINGS_SPANISH
+//                        , Consumed.with(Serdes.String(), Serdes.String())
+                );
 
         var mergedStream = greetingsStream.merge(greetingsSpanishStream);
         mergedStream.print(Printed.<String, String>toSysOut().withLabel("mergedStream"));
